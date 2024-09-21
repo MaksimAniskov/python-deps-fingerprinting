@@ -1,0 +1,22 @@
+services:
+
+  stat-analysis:
+    build:
+      context: https://github.com/MaksimAniskov/python-deps-fingerprinting.git#1.x:/stat_analysis
+    volumes:
+      - ${SRC_FOLDER}:/app:ro
+      - intermediate_files:/usr/var/intermediate_files
+    command: /usr/var/intermediate_files/stat_analysis.tsv /app/**/*.py
+
+  call-graph-fingerprint:
+    depends_on:
+      stat-analysis:
+        condition: service_completed_successfully
+    build:
+      context: https://github.com/MaksimAniskov/python-deps-fingerprinting.git#1.x:/call_graph_fingerprint
+    command: ${TARGET_LIB_PREFIXES}
+    volumes:
+      - intermediate_files:/var/lib/neo4j/import/intermediate_files
+
+volumes:
+  intermediate_files: {}
